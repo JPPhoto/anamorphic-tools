@@ -18,7 +18,7 @@ from invokeai.invocation_api import (
 )
 
 
-@invocation("anamorphic_streaks", title="Anamorphic Streaks", tags=["image", "anamorphic"], version="1.0.0")
+@invocation("anamorphic_streaks", title="Anamorphic Streaks", tags=["image", "anamorphic"], version="1.0.1")
 class AnamorphicStreaksInvocation(BaseInvocation, WithBoard, WithMetadata):
     """Adds anamorphic streaks to the input image"""
 
@@ -35,6 +35,7 @@ class AnamorphicStreaksInvocation(BaseInvocation, WithBoard, WithMetadata):
     internal_reflection_strength: float = InputField(
         ge=0.0, le=1.0, description="Internal reflection strength", default=0.3
     )
+    streak_width: int = InputField(description="Streak width (recommended image width)", default=512, gt=0)
 
     # Create a fading line kernel
     def create_fading_line_kernel(self, length):
@@ -63,7 +64,7 @@ class AnamorphicStreaksInvocation(BaseInvocation, WithBoard, WithMetadata):
         return result
 
     def add_horizontal_streaks(self, image):
-        width, height = image.size
+        width = self.streak_width
 
         # Convert to numpy array for processing
         img_array = np.array(image)
