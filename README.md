@@ -1,5 +1,7 @@
 # anamorphic-tools
-Provides InvokeAI nodes for applying spherical distortion and adding anamorphic flares to images.
+Provides InvokeAI nodes for applying anamorphic lens blur, anamorphic flares, and spherical distortion to images.
+It's recommended that you apply them in that order in your pipeline to simulate the actual optics of an
+anamorphic lens.
 
 ## Examples:
 
