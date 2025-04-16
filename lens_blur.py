@@ -36,7 +36,7 @@ class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
     )
     max_blur_radius: float = InputField(description="Maximum blur radius", default=5.0, gt=0.0)
     max_blur_steps: int = InputField(description="Number of blur maps to use internally", default=32, gt=1)
-    anamorphic_factor: float = InputField(description="Anamorphic squeeze factor", default=1.35, gt=1.0)
+    anamorphic_factor: float = InputField(description="Anamorphic squeeze factor", default=1.35, ge=1.0)
     highlight_threshold: float = InputField(
         description="The luminance threshold at which highlight enhancement begins",
         default=0.75,
