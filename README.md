@@ -3,6 +3,9 @@ Provides InvokeAI nodes for applying anamorphic lens blur, anamorphic flares, an
 It's recommended that you apply them in that order in your pipeline to simulate the actual optics of an
 anamorphic lens.
 
+Also provided is an aperture generator, and its inputs can be fed into the lens blur node for different aperture
+effects. You can provide your own aperture images and they will be turned square by the blur node.
+
 ## Examples:
 
 ![image](https://github.com/user-attachments/assets/86b596f3-5f8a-4fc6-a9e1-fee613002729)

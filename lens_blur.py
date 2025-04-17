@@ -1,5 +1,7 @@
 # Copyright (c) 2025 Jonathan S. Pollack (https://github.com/JPPhoto)
 
+from typing import Optional
+
 import cv2
 import numpy as np
 from PIL import Image
@@ -16,12 +18,15 @@ from invokeai.invocation_api import (
 )
 
 
-@invocation("lens_blur", title="Lens Blur", tags=["image", "lens", "blur"], version="1.0.0")
+@invocation("lens_blur", title="Lens Blur", tags=["image", "lens", "blur"], version="1.0.1")
 class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
     """Adds lens blur to the input image, first converting the input image to RGB"""
 
     image: ImageField = InputField(description="The image to streak")
     depth_map: ImageField = InputField(description="The depth map to use")
+    aperture_image: Optional[ImageField] = InputField(
+        description="The aperture image to use for convolution", default=None
+    )
     focal_distance: float = InputField(
         description="The distance at which focus is sharp: 0.0 (near) - 1.0 (far)",
         default=0.5,
@@ -43,13 +48,11 @@ class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
         ge=0.0,
         le=1.0,
     )
-
     highlight_factor: float = InputField(
         description="Minimum multiplier for highlights at the threshold",
         default=1.0,
         ge=1.0,
     )
-
     highlight_factor_high: float = InputField(
         description="Maximum multiplier for highlights at full brightness",
         default=2.0,
@@ -66,6 +69,35 @@ class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
 
         # Apply the blur
         blurred = cv2.GaussianBlur(image_numpy, ksize, sigmaX=sigma_x, sigmaY=sigma_y, borderType=cv2.BORDER_REFLECT)
+
+        return blurred
+
+    def apply_aperture_image_blur(
+        self, image: Image, aperture_image: Image, sigma_y: float, anamorphic_squeeze: float
+    ) -> np.ndarray:
+        # A convenience function to help get the image sizing just right
+        def size_from_sigma(sigma: float) -> int:
+            return 2 * int(np.ceil(3 * sigma)) + 1
+
+        sigma_x = sigma_y / anamorphic_squeeze
+        size_x = size_from_sigma(sigma_x)
+        size_y = size_from_sigma(sigma_y)
+
+        image_numpy = image.astype(np.float32)
+
+        # Extract and normalize the convolution kernel
+        resized_kernel_img = aperture_image.resize((size_x, size_y), resample=Image.LANCZOS)
+        kernel = np.array(resized_kernel_img, dtype=np.float32)
+        kernel /= kernel.sum()
+
+        # Apply convolution channel-wise
+        blurred = np.stack(
+            [
+                cv2.filter2D(image_numpy[..., c], -1, kernel, borderType=cv2.BORDER_REFLECT)
+                for c in range(image_numpy.shape[2])
+            ],
+            axis=2,
+        )
 
         return blurred
 
@@ -130,7 +162,7 @@ class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
 
         # Apply enhancement
         enhanced = image * factor_expanded
-        enhanced = np.clip(enhanced, 0.0, 1.0) * 255.0
+        enhanced = enhanced * 255.0
 
         return enhanced
 
@@ -149,9 +181,20 @@ class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
         img_blurred = [None] * self.max_blur_steps
         img_blurred[0] = image_numpy
         for blur in range(1, self.max_blur_steps):
-            img_blurred[blur] = self.apply_anamorphic_gaussian_blur(
-                image_numpy, blur * self.max_blur_radius / self.max_blur_steps, self.anamorphic_factor
-            )
+            if self.aperture_image is None:
+                # Use Gaussian blur
+                img_blurred[blur] = self.apply_anamorphic_gaussian_blur(
+                    image_numpy, blur * self.max_blur_radius / self.max_blur_steps, self.anamorphic_factor
+                )
+            else:
+                aperture_image = context.images.get_pil(self.aperture_image.image_name)
+                aperture_image = aperture_image.convert("L")
+                img_blurred[blur] = self.apply_aperture_image_blur(
+                    image_numpy,
+                    aperture_image,
+                    blur * self.max_blur_radius / self.max_blur_steps,
+                    self.anamorphic_factor,
+                )
 
         img_blurred = self.apply_blur_based_on_depth(img_blurred, depth_map_numpy)
         img_blurred = np.clip(img_blurred, 0, 255).astype(np.uint8)
