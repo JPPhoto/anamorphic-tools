@@ -1,10 +1,15 @@
 # anamorphic-tools
 Provides InvokeAI nodes for applying anamorphic lens blur, anamorphic flares, and spherical distortion to images.
-It's recommended that you apply them in that order in your pipeline to simulate the actual optics of an
-anamorphic lens.
 
-Also provided is an aperture generator, and its inputs can be fed into the lens blur node for different aperture
-effects. You can provide your own aperture images and they will be turned square by the blur node.
+Also provided are an aperture generator and loader. The generator's output can be fed into the lens blur node for
+different aperture effects. The same goes for the Load Aperture Image node; you can provide your own aperture images
+in the `aperture_images` folder. (Note that all images loaded will become square as that is the expectation of the
+Lens Blur node.)
+
+The ideal pipeline to use when postprocessing images - one that reflects the real optical characteristics of an
+anamorphic lens connected to a camera - is:
+
+Image &rarr; Lens Blur &rarr; Spherical Distortion &rarr; Anamorphic Streaks
 
 ## Examples:
 

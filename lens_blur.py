@@ -85,8 +85,10 @@ class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
 
         image_numpy = image.astype(np.float32)
 
-        # Extract and normalize the convolution kernel
+        # Extract, flip, and normalize the convolution kernel
         resized_kernel_img = aperture_image.resize((size_x, size_y), resample=Image.LANCZOS)
+        resized_kernel_img = resized_kernel_img.transpose(Image.FLIP_TOP_BOTTOM)
+        resized_kernel_img = resized_kernel_img.transpose(Image.FLIP_LEFT_RIGHT)
         kernel = np.array(resized_kernel_img, dtype=np.float32)
         kernel /= kernel.sum()
 
