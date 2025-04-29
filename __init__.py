@@ -1,5 +1,6 @@
 from .anamorphic_streaks import AnamorphicStreaksInvocation
 from .lens_aperture_generator import LensApertureGeneratorInvocation
 from .lens_blur import LensBlurInvocation
+from .lens_vignette import LensVignetteInvocation
 from .load_aperture_image import LoadApertureImageInvocation
 from .spherical_distortion import SphericalDistortionInvocation
