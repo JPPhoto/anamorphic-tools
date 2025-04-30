@@ -10,7 +10,7 @@ Lens Blur node.)
 The ideal pipeline to use when postprocessing images - one that reflects the real optical characteristics of an
 anamorphic lens connected to a camera - is:
 
-Lens Vignette &rarr; Image &rarr; Lens Blur &rarr; Spherical Distortion &rarr; Anamorphic Streaks
+Image &rarr; Lens Vignette &rarr; Lens Blur &rarr; Spherical Distortion &rarr; Anamorphic Streaks
 
 ## Examples:
 
