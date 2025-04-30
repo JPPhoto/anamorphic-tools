@@ -20,7 +20,7 @@ from invokeai.invocation_api import (
     title="Lens Vignette",
     tags=["image", "postprocessing", "vignette"],
     category="image",
-    version="1.1.0",
+    version="1.1.1",
 )
 class LensVignetteInvocation(BaseInvocation, WithBoard, WithMetadata):
     """Apply realistic lens vignetting to an image with configurable parameters."""
@@ -32,6 +32,19 @@ class LensVignetteInvocation(BaseInvocation, WithBoard, WithMetadata):
     )
     center_x: float = InputField(default=0.5, ge=0.0, le=1.0, description="X coordinate of vignette center (0-1)")
     center_y: float = InputField(default=0.5, ge=0.0, le=1.0, description="Y coordinate of vignette center (0-1)")
+    preserve_highlights: bool = InputField(default=True, description="Preserve highlights")
+
+    def do_highlight_preservation(
+        self, img_linear: np.ndarray, img_vignetted: np.ndarray, highlights_vignetted: np.ndarray
+    ) -> np.ndarray:
+        # Compute luminance
+        luma = 0.2126 * img_linear[..., 0] + 0.7152 * img_linear[..., 1] + 0.0722 * img_linear[..., 2]
+
+        # Simple threshold-based mask
+        highlight = np.clip((luma - 0.85) / 0.15, 0.0, 1.0)
+
+        result = highlight[..., None] * highlights_vignetted + (1.0 - highlight[..., None]) * img_vignetted
+        return result
 
     def apply_vignette(self, image: Image.Image) -> Image.Image:
         """Apply a cosine-fourth power vignette effect with optional off-center falloff."""
@@ -86,8 +99,21 @@ class LensVignetteInvocation(BaseInvocation, WithBoard, WithMetadata):
         vignette = np.cos(np.clip(r * self.aperture_factor, 0.0, 1.0) * (np.pi / 2)) ** 4
         vignette_mask = 1.0 - self.intensity * (1.0 - vignette)
         vignette_mask = vignette_mask[..., None]  # expand for broadcast
+        vignette_mask = np.clip(vignette_mask, 0.0, 1.0)
 
-        img_linear *= vignette_mask
+        img_vignetted = img_linear * vignette_mask
+
+        if self.preserve_highlights:
+            highlight_mask = 1.0 - (self.intensity * 0.5) * (1.0 - vignette)
+            highlight_mask = highlight_mask[..., None]  # expand for broadcast
+            highlight_mask = np.clip(highlight_mask, 0.0, 1.0)
+
+            highlights_vignetted = img_linear * highlight_mask
+
+            img_linear = self.do_highlight_preservation(img_linear, img_vignetted, highlights_vignetted)
+        else:
+            img_linear = img_vignetted
+
         rgb_srgb = linear_to_srgb(img_linear)
 
         if alpha is not None:
