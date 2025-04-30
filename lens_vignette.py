@@ -20,15 +20,15 @@ from invokeai.invocation_api import (
     title="Lens Vignette",
     tags=["image", "postprocessing", "vignette"],
     category="image",
-    version="1.1.1",
+    version="1.1.2",
 )
 class LensVignetteInvocation(BaseInvocation, WithBoard, WithMetadata):
     """Apply realistic lens vignetting to an image with configurable parameters."""
 
     image: ImageField = InputField(description="The image to apply vignetting to")
-    intensity: float = InputField(default=0.75, ge=0.0, le=4.0, description="Intensity of the vignette effect (0-4)")
+    intensity: float = InputField(default=0.5, ge=0.0, le=4.0, description="Intensity of the vignette effect (0-4)")
     aperture_factor: float = InputField(
-        default=1, ge=0.2, le=1.5, description="Aperture falloff factor (>1.2 = strong, <0.5 = weak)"
+        default=0.5, ge=0.2, le=1.5, description="Aperture falloff factor (>1.2 = strong, <0.5 = weak)"
     )
     center_x: float = InputField(default=0.5, ge=0.0, le=1.0, description="X coordinate of vignette center (0-1)")
     center_y: float = InputField(default=0.5, ge=0.0, le=1.0, description="Y coordinate of vignette center (0-1)")
