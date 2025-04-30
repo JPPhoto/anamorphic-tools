@@ -41,9 +41,11 @@ class LensVignetteInvocation(BaseInvocation, WithBoard, WithMetadata):
         luma = 0.2126 * img_linear[..., 0] + 0.7152 * img_linear[..., 1] + 0.0722 * img_linear[..., 2]
 
         # Simple threshold-based mask
-        highlight = np.clip((luma - 0.85) / 0.15, 0.0, 1.0)
+        highlight = np.clip((luma - 0.7) / 0.4, 0.0, 1.0)
+        highlight = highlight ** 1.5
 
         result = highlight[..., None] * highlights_vignetted + (1.0 - highlight[..., None]) * img_vignetted
+        result = np.clip(result, 0.0, 1.0)
         return result
 
     def apply_vignette(self, image: Image.Image) -> Image.Image:
