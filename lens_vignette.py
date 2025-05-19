@@ -126,7 +126,8 @@ class LensVignetteInvocation(BaseInvocation, WithBoard, WithMetadata):
         # Step 3: Gamma encode
         def encode(c):
             a = 0.055
-            return np.where(c <= 0.0031308, 12.92 * c, (1 + a) * (c ** (1 / 2.4)) - a)
+            c_safe = np.maximum(c, 0.0)
+            return np.where(c_safe <= 0.0031308, 12.92 * c_safe, (1 + a) * (c_safe ** (1 / 2.4)) - a)
 
         return np.clip(encode(rgb_linear), 0.0, 1.0)
 
