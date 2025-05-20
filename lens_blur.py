@@ -18,15 +18,13 @@ from invokeai.invocation_api import (
 )
 
 
-@invocation("lens_blur", title="Lens Blur", tags=["image", "lens", "blur"], version="1.0.2")
+@invocation("lens_blur", title="Lens Blur", tags=["image", "lens", "blur"], version="1.0.3")
 class LensBlurInvocation(BaseInvocation, WithBoard, WithMetadata):
     """Adds lens blur to the input image, first converting the input image to RGB"""
 
     image: ImageField = InputField(description="The image to streak")
     depth_map: ImageField = InputField(description="The depth map to use")
-    aperture_image: Optional[ImageField] = InputField(
-        description="The aperture image to use for convolution", default=None
-    )
+    aperture_image: Optional[ImageField] = InputField(description="The aperture image to use for convolution")
     focal_distance: float = InputField(
         description="The distance at which focus is sharp: 0.0 (near) - 1.0 (far)",
         default=0.5,
