@@ -1,6 +1,6 @@
 # anamorphic-tools
-Provides InvokeAI nodes for applying anamorphic lens blur, anamorphic flares, spherical distortion, and lens
-vignette to images.
+Provides InvokeAI nodes for applying anamorphic lens blur, anamorphic flares, spherical distortion, chromatic
+aberration, and lens vignette to images.
 
 Also provided are an aperture generator and loader. The generator's output can be fed into the lens blur node for
 different aperture effects. The same goes for the Load Aperture Image node; you can provide your own aperture images
@@ -10,7 +10,8 @@ Lens Blur node.)
 The ideal pipeline to use when postprocessing images - one that reflects the real optical characteristics of an
 anamorphic lens connected to a camera - is:
 
-Image &rarr; Lens Vignette &rarr; Lens Blur &rarr; Spherical Distortion &rarr; Anamorphic Streaks
+Image &rarr; Lens Vignette &rarr; Lens Blur &rarr; Spherical Distortion &rarr; Chromatic Aberration &rarr;
+Anamorphic Streaks
 
 ## Examples:
 

@@ -1,4 +1,5 @@
 from .anamorphic_streaks import AnamorphicStreaksInvocation
+from .chromatic_aberration import ChromaticAberrationInvocation
 from .lens_aperture_generator import LensApertureGeneratorInvocation
 from .lens_blur import LensBlurInvocation
 from .lens_vignette import LensVignetteInvocation
