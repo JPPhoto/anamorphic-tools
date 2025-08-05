@@ -163,7 +163,7 @@ class LensApertureGeneratorInvocation(BaseInvocation, WithBoard, WithMetadata):
         aperture_image = self.generate_aperture_image(size)
 
         image = np.clip(aperture_image * 255.0, 0.0, 255.0)
-        image = Image.fromarray(image.astype(np.uint8), mode="L")
+        image = Image.fromarray(image.astype(np.uint8))
         image_dto = context.images.save(image=image)
 
         return ImageOutput.build(image_dto)
